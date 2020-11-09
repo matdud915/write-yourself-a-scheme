@@ -35,6 +35,29 @@ parseHexNumber = do
   let parsedHexNumber = readHex hexNumber
   return parsedHexNumber >>= \x -> x !! 0 |> fst |> show |> return
 
+parseHashDecimalWithDot :: Parser String
+parseHashDecimalWithDot = do
+  wholeNumberPart <- many digit
+  separator <- optionMaybe (char '.')
+  decimal <- case separator of
+            Just dot -> do
+              decimalPart <- many digit
+              return $ (concat [wholeNumberPart, [dot], decimalPart])
+            Nothing -> do return $ wholeNumberPart
+  return decimal
+
+parseHashDecimalWithoutDot :: Parser String
+parseHashDecimalWithoutDot = do
+  wholeNumberPart <- many1 digit
+  return wholeNumberPart
+
+parseHashDecimal :: Parser LispVal
+parseHashDecimal = do
+  char 'd'
+  decimal <- parseHashDecimalWithDot 
+  let parsedDecimal = readFloat decimal
+  return parsedDecimal >>= \x -> x !! 0 |> fst |> Decimal |> return
+
 parseHashNumber :: Parser LispVal
 parseHashNumber = do
   num <- parseBinaryNumber <|> parseOctalNumber <|> parseHexNumber
@@ -49,5 +72,5 @@ parseCharacter = do
 parseHashAtom :: Parser LispVal
 parseHashAtom = do
   parseTrueLiteral <|> parseFalseLiteral <|>
-    parseCharacter <|> 
+    parseCharacter <|> parseHashDecimal <|>
       parseHashNumber
