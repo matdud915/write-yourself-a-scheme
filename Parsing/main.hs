@@ -1,9 +1,22 @@
 module Main where
-import Control.Monad
-import Text.ParserCombinators.Parsec hiding (spaces)
-import System.Environment
+import Control.Monad ( liftM )
+import Text.ParserCombinators.Parsec
+    ( char,
+      digit,
+      letter,
+      oneOf,
+      space,
+      endBy,
+      sepBy,
+      skipMany1,
+      (<|>),
+      many,
+      parse,
+      try,
+      Parser )
+import System.Environment ( getArgs )
 import NumberParser (parseNumber)
-import LispCore
+import LispCore ( LispVal(DottedList, List, Atom) )
 import HashAtomParser (parseHashAtom)
 import StringParser (parseString)
 
