@@ -1,4 +1,4 @@
-module StringParser where
+module Parsers.StringParser where
 
 import LispCore (LispVal (String))
 import Text.ParserCombinators.Parsec

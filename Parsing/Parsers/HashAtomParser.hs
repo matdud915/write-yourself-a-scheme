@@ -1,18 +1,20 @@
-module HashAtomParser where
-import Text.ParserCombinators.Parsec
-    ( anyChar,
-      char,
-      digit,
-      oneOf,
-      many1,
-      optionMaybe,
-      (<|>),
-      many,
-      Parser )
-import LispCore ( LispVal(Character, Number, Decimal, Bool) )
-import Flow ( (|>) )
-import Numeric ( readFloat, readHex, readOct )
+module Parsers.HashAtomParser where
+
 import Data.Char (digitToInt)
+import Flow ((|>))
+import LispCore (LispVal (Bool, Character, Decimal, Number))
+import Numeric (readFloat, readHex, readOct)
+import Text.ParserCombinators.Parsec
+  ( Parser,
+    anyChar,
+    char,
+    digit,
+    many,
+    many1,
+    oneOf,
+    optionMaybe,
+    (<|>),
+  )
 
 parseTrueLiteral :: Parser LispVal
 parseTrueLiteral = do
@@ -28,7 +30,7 @@ parseBinaryNumber :: Parser String
 parseBinaryNumber = do
   char 'b'
   binaryNumber <- many1 $ oneOf "01"
-  return $ show $ foldl (\acc x -> acc*2 + (toInteger . digitToInt) x) 0 binaryNumber
+  return $ show $ foldl (\acc x -> acc * 2 + (toInteger . digitToInt) x) 0 binaryNumber
 
 parseOctalNumber :: Parser String
 parseOctalNumber = do
@@ -49,10 +51,10 @@ parseHashDecimalWithDot = do
   wholeNumberPart <- many digit
   separator <- optionMaybe (char '.')
   decimal <- case separator of
-            Just dot -> do
-              decimalPart <- many digit
-              return $ (concat [wholeNumberPart, [dot], decimalPart])
-            Nothing -> do return $ wholeNumberPart
+    Just dot -> do
+      decimalPart <- many digit
+      return $ (concat [wholeNumberPart, [dot], decimalPart])
+    Nothing -> do return $ wholeNumberPart
   return decimal
 
 parseHashDecimalWithoutDot :: Parser String
@@ -63,7 +65,7 @@ parseHashDecimalWithoutDot = do
 parseHashDecimal :: Parser LispVal
 parseHashDecimal = do
   char 'd'
-  decimal <- parseHashDecimalWithDot 
+  decimal <- parseHashDecimalWithDot
   let parsedDecimal = readFloat decimal
   return parsedDecimal >>= \x -> x !! 0 |> fst |> Decimal |> return
 
@@ -80,6 +82,7 @@ parseCharacter = do
 
 parseHashAtom :: Parser LispVal
 parseHashAtom = do
-  parseTrueLiteral <|> parseFalseLiteral <|>
-    parseCharacter <|> parseHashDecimal <|>
-      parseHashNumber
+  parseTrueLiteral <|> parseFalseLiteral
+    <|> parseCharacter
+    <|> parseHashDecimal
+    <|> parseHashNumber
