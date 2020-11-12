@@ -1,15 +1,24 @@
 module StringParser where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import LispCore
+
+import LispCore (LispVal (String))
+import Text.ParserCombinators.Parsec
+  ( Parser,
+    char,
+    many,
+    many1,
+    noneOf,
+    oneOf,
+    (<|>),
+  )
 
 parseEscapeCharacters :: Parser String
 parseEscapeCharacters = do
   escape <- char '\\'
-  character <- oneOf ("\"nrt\\")
+  character <- oneOf "\"nrt\\"
   return [escape, character]
 
 parseNonEscapeCharacters :: Parser Char
-parseNonEscapeCharacters = noneOf ("\\\"")
+parseNonEscapeCharacters = noneOf "\\\""
 
 parseCharacter :: Parser String
 parseCharacter = do

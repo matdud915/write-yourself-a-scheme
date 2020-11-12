@@ -1,8 +1,6 @@
 module NumberParser where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import LispCore
-import Numeric
-import Data.Char (digitToInt)
+import Text.ParserCombinators.Parsec ( digit, many1, Parser )
+import LispCore ( LispVal(Number) )
 
 parseNumber :: Parser LispVal
 parseNumber = do
