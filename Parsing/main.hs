@@ -3,13 +3,13 @@ module Main where
 import Parsers.ExpressionParser (parseExpr)
 import System.Environment (getArgs)
 import Text.ParserCombinators.Parsec (parse)
+import LispCore
+import Evaluators.Eval
 
-readExpr :: String -> String
+readExpr :: String -> LispVal
 readExpr input = case parse parseExpr "lisp" input of
-  Left err -> "No match: " ++ show err
-  Right val -> "Found value: " ++ show val
+  Left err -> String $ "No match: " ++ show err
+  Right val -> val
 
 main :: IO ()
-main = do
-  (expr : _) <- getArgs
-  putStrLn $ readExpr expr
+main = getArgs >>= print . eval . readExpr . head
