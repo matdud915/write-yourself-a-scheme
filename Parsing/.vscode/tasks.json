@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "ghc -o pars.o main.hs "
+            "command": "ghc -XExistentialQuantification -o pars.o main.hs "
         }
     ]
 }
