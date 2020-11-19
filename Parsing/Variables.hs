@@ -2,10 +2,8 @@ module Variables where
 
 import Data.IORef
 import Control.Monad.Except
-import LispError
 import LispCore
 
-type Env = IORef [(String, IORef LispVal)]
 type IOThrowsError = ExceptT LispError IO
 
 liftThrows :: ThrowsError a -> IOThrowsError a

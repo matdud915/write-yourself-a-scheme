@@ -3,12 +3,10 @@ module Main where
 import Control.Monad.Except
 import Evaluators.Eval
 import LispCore
-import LispError
 import Parsers.ExpressionParser (parseExpr)
 import System.Environment (getArgs)
 import Text.ParserCombinators.Parsec (parse)
 import System.IO
-import Data.IORef
 import Variables
 
 flushStr :: String -> IO ()
@@ -31,10 +29,10 @@ until_ pred prompt action = do
           else action result >> until_ pred prompt action
 
 runOne :: String -> IO () 
-runOne expr =  nullEnv >>= flip evalAndPrint expr
+runOne expr = primitiveBindings >>= flip evalAndPrint expr
 
 runRepl :: IO ()
-runRepl = nullEnv >>= until_ (== "quit") (readPrompt "Lisp>>> ") . evalAndPrint
+runRepl = primitiveBindings >>= until_ (== "quit") (readPrompt "Lisp>>> ") . evalAndPrint
 
 readExpr :: String -> ThrowsError LispVal
 readExpr input = case parse parseExpr "lisp" input of
