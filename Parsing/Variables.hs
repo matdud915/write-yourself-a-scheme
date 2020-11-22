@@ -4,8 +4,6 @@ import Data.IORef
 import Control.Monad.Except
 import LispCore
 
-type IOThrowsError = ExceptT LispError IO
-
 liftThrows :: ThrowsError a -> IOThrowsError a
 liftThrows (Left err) = throwError err
 liftThrows (Right val) = return val

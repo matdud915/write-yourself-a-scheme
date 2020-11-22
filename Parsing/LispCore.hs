@@ -2,6 +2,9 @@ module LispCore where
 import Text.ParserCombinators.Parsec
 import Control.Monad.Except
 import Data.IORef
+import GHC.IO.Handle
+
+type IOThrowsError = ExceptT LispError IO
 
 data LispVal
   = Atom String
@@ -14,6 +17,8 @@ data LispVal
   | Decimal Float
   | PrimitiveFunc ([LispVal] -> ThrowsError LispVal)
   | Func { params :: [String], vararg :: (Maybe String), body :: [LispVal], closure :: Env}
+  | IOFunc ([LispVal] -> IOThrowsError LispVal)
+  | Port Handle
 
 instance Show LispVal where show = showVal
 
@@ -42,11 +47,11 @@ showVal (Func {params = args, vararg = varargs, body = body, closure = env}) =
     (case varargs of 
       Nothing -> ""
       Just arg ->  " . " ++ arg) ++ ") ...)"
-
+showVal(Port _) = "<IO port>"
+showVal(IOFunc _) = "<IO primitive"
 
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
-
 
 showError :: LispError -> String
 showError (UnboundVar message varname) = message ++ ": " ++ varname

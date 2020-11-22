@@ -3,9 +3,9 @@ module Main where
 import Control.Monad.Except
 import Evaluators.Eval
 import LispCore
-import Parsers.ExpressionParser (parseExpr)
+import Parsers.ExpressionParser (parseExpr, spaces)
 import System.Environment (getArgs)
-import Text.ParserCombinators.Parsec (parse)
+import Text.ParserCombinators.Parsec (endBy, Parser, parse)
 import System.IO
 import Variables
 
@@ -28,21 +28,15 @@ until_ pred prompt action = do
           then return ()
           else action result >> until_ pred prompt action
 
-runOne :: String -> IO () 
-runOne expr = primitiveBindings >>= flip evalAndPrint expr
+runOne :: [String] -> IO () 
+runOne args = do
+  env <- primitiveBindings >>= flip bindVars [("args", List $ map String $ drop 1 args)]
+  (runIOThrows $ liftM show $ eval env (List [Atom "load", String (args !! 0)])) >>= hPutStrLn stderr
 
 runRepl :: IO ()
 runRepl = primitiveBindings >>= until_ (== "quit") (readPrompt "Lisp>>> ") . evalAndPrint
 
-readExpr :: String -> ThrowsError LispVal
-readExpr input = case parse parseExpr "lisp" input of
-  Left err -> throwError $ Parser err
-  Right val -> return val
-
 main :: IO ()
 main = do
   args <- getArgs
-  case length args of
-    0 -> runRepl
-    1 -> runOne $ args !! 0
-    _ -> putStrLn "Program takes only 0 or 1 argument"
+  if null args then runRepl else runOne $ args
